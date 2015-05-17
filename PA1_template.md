@@ -14,8 +14,8 @@ data source:  https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zi
 ##Getting started:
 
 As a first step, the required packages are pulled into the library (data.table and dplyr), the directory is defined.
-```{r}
-  
+
+```r
   library(data.table)
   library(dplyr)
   setwd("~/GitHub/CourseraDST/RepData_PeerAssessment1")
@@ -31,8 +31,8 @@ The date is converted to day names and added to a new variable "wkdy".  This var
 
 The next step was to split the dataframe into observations with and without "NA" for step values.
 
-```{r}
-  
+
+```r
   mydata1 <- read.csv(url1,header=TRUE, skip=0, na.strings="NA", stringsAsFactors=FALSE,nrows=-1L)
 
   mydata2 <- tbl_df(mydata1)
@@ -53,9 +53,14 @@ The next step was to split the dataframe into observations with and without "NA"
   stepNA <- nrow(x)
 
   cat(stepNA, " observations are NA values for step count")
+```
 
+```
+## 2304  observations are NA values for step count
+```
+
+```r
   mydata3 <- subset(mydata2,!is.na(mydata2$steps))
-
 ```
 ##What is mean total number of steps taken per day?:
 
@@ -63,8 +68,8 @@ Sum the steps by date and calculate the mean and median.
 
 Note: In this set of results, only the populated observations are included in plots and calcs.
 
-```{r , echo = TRUE}
 
+```r
 ##use data with only populated step data and group by date
 DFGroupDate <- group_by(mydata3, date)
 ##calculate the total for each date
@@ -73,26 +78,40 @@ DFResultDate <- summarise(DFGroupDate,Mean = mean(steps), SUM = as.numeric(sum(s
 ##calculate the mean and median of daily steps totals across the time periods
   stepMedian <-median(DFResultDate$SUM) 
   stepMean <-mean(DFResultDate$SUM) 
- 
 ```
 
 
 Figure 1. Histogram of total steps per day, with the calculated means and medians below
 
-```{r Figure 1. Histogram of total steps, echo = TRUE}
-  
+
+```r
  hist(DFResultDate$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total")
+```
 
+![plot of chunk Figure 1. Histogram of total steps](figure/Figure 1. Histogram of total steps-1.png) 
+
+```r
   cat("The mean daily total = ", round(stepMean))
-  cat("The median daily total = ", round(stepMedian))
+```
 
+```
+## The mean daily total =  10766
+```
+
+```r
+  cat("The median daily total = ", round(stepMedian))
+```
+
+```
+## The median daily total =  10765
 ```
 
 ##What is the average daily activity pattern?
 
 Group the step observations by intervals and calculate the means
 
-```{r, echo = TRUE}
+
+```r
 ##use data with only populated step data and group by interval
 
   DFGroupInt<- group_by(mydata3, interval)
@@ -104,34 +123,34 @@ Group the step observations by intervals and calculate the means
 ##identify the interval with the highest mean 
   stepMax <- max(DFResultInt$Mean)
   stepPoint <- subset(DFResultInt, Mean == stepMax)
-
 ```
 
 
 Figure 2. The line graph of average steps per interval 
-```{r Figure 2. Line plot of mean steps per interval, echo= TRUE}
 
+```r
   par(mar = rep(2, 4))
   plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = "Intervals", ylab = "Average Steps per Interval")
     points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
     text(x=stepPoint$interval + 800, y=stepPoint$Mean,"Interval with highest mean number of steps")
-
 ```
+
+![plot of chunk Figure 2. Line plot of mean steps per interval](figure/Figure 2. Line plot of mean steps per interval-1.png) 
 
 
 Note: Intervals translate to 5 minute increments using the 24:00 clock, eg, 835 = 08:35, 1000 = 10:00, 2350 = 23:50
 
-```{r, echo = FALSE}
 
-  cat("Interval number ", stepPoint$interval, " had the highest mean of ", round(stepMax))
+```
+## Interval number  835  had the highest mean of  206
 ```
 
 ##Imputing missing values:
 
 As the next step, the interval averages for observations with valid step data are used to populate the observations without data. The data set is re-combined and then the analysis is repeated. 
 
-```{r, echo = TRUE}
 
+```r
   mydataNA <- subset(mydata2,is.na(mydata2$steps))
   mydataNA <- select(mydataNA, -steps)
   
@@ -139,7 +158,13 @@ As the next step, the interval averages for observations with valid step data ar
   colnames(DFStepFill)[2] <- "steps"
   
   mydataNAFill <- left_join(mydataNA,DFStepFill)
-  
+```
+
+```
+## Joining by: "interval"
+```
+
+```r
   DFStepsComp <- rbind(mydata3,mydataNAFill)
   
   DFGroupDateComp <- group_by(DFStepsComp, date)
@@ -151,26 +176,73 @@ As the next step, the interval averages for observations with valid step data ar
 
 
 Figure 3. Histogram of total steps per day, with NA values imputed
-```{r Figure 3. Histogram of total steps per day, with NA values imputed, echo= TRUE} 
 
+```r
   hist(DFResultDateComp$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total (completed data)")
+```
 
+![plot of chunk Figure 3. Histogram of total steps per day, with NA values imputed](figure/Figure 3. Histogram of total steps per day, with NA values imputed-1.png) 
+
+```r
   cat("Updated results after imputing missing data:")
-  cat("  The mean daily average = ", round(stepMeanComp))
-  cat("  The median daily average = ", round(stepMedianComp))
-  cat("  ")
-  cat("The difference from prior calcualtions:")
-  cat("  The new mean - prior mean =", stepMeanComp -stepMean)
-  cat("  The new median - prior median =", stepMedianComp -stepMedian)
+```
 
+```
+## Updated results after imputing missing data:
+```
+
+```r
+  cat("  The mean daily average = ", round(stepMeanComp))
+```
+
+```
+##   The mean daily average =  10766
+```
+
+```r
+  cat("  The median daily average = ", round(stepMedianComp))
+```
+
+```
+##   The median daily average =  10766
+```
+
+```r
+  cat("  ")
+```
+
+  
+
+```r
+  cat("The difference from prior calcualtions:")
+```
+
+```
+## The difference from prior calcualtions:
+```
+
+```r
+  cat("  The new mean - prior mean =", stepMeanComp -stepMean)
+```
+
+```
+##   The new mean - prior mean = 0
+```
+
+```r
+  cat("  The new median - prior median =", stepMedianComp -stepMedian)
+```
+
+```
+##   The new median - prior median = 1.188679
 ```
 
 ##Are there differences in activity patterns between weekdays and weekends?:
 
 Next the filled in data set is grouped by weekday vs weekend and interval to produce a panel plot comparing the interval averages for weekend vs weekday.  
 
-```{r, echo = TRUE}
 
+```r
   DFGroupIntW<- group_by(DFStepsComp, interval, wkdy)
 
   DFResultIntW <- summarise(DFGroupIntW,Mean = mean(steps), SUM = as.numeric(sum(steps)), MAX = as.numeric(max(steps)))
@@ -180,10 +252,12 @@ library(lattice)
 
 
 Figure 4. Mean Steps Weekend vs Weekday Intervals
-```{r Figure 4. Mean Steps Weekend vs Weekday Intervals, echo = TRUE}
 
+```r
 xyplot( Mean ~ interval | wkdy, type = 'b', panel = function(x, y) { llines(x=x,y=y) }, data = DFResultIntW, main = "Steps by Interval Weekend vs Weekday", xlab = "Intervals", ylab = "Mean Steps per Interval", layout=(c(1,2)))
 ```
+
+![plot of chunk Figure 4. Mean Steps Weekend vs Weekday Intervals](figure/Figure 4. Mean Steps Weekend vs Weekday Intervals-1.png) 
 
 Note: Intervals translate to 5 minute increments using the 24:00 clock, eg, 835 = 08:35, 1000 = 10:00, 2350 = 23:50
 
