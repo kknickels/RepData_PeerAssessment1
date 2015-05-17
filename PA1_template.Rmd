@@ -2,7 +2,9 @@
 title: "PA1_template"
 author: "kknickels"
 date: "Thursday, May 14, 2015"
-output: html_document
+output:
+  html_document:
+    fig_caption: yes
 ---
 
 This is an R Markdown document, the first assignment for Reproducible Research.  The data used used for this work is found at the URL below: 
@@ -44,6 +46,7 @@ The next step was to split the dataframe into observations with and without "NA"
   mydata2$wkdy <- sub("Thu", "Weekday",mydata2$wkdy)
   mydata2$wkdy <- sub("Fri", "Weekday",mydata2$wkdy)
 
+
   x <- subset(mydata2,is.na(mydata2$steps))
 
   mydata3 <- subset(mydata2,!is.na(mydata2$steps))
@@ -52,6 +55,7 @@ The next step was to split the dataframe into observations with and without "NA"
 ##What is mean total number of steps taken per day?:
 
 Sum the steps by date and calculate the mean and median. 
+
 Note: In the first set of results are shown for only the populated observations.
 
 ```{r , echo = TRUE}
@@ -61,15 +65,15 @@ DFGroupDate <- group_by(mydata3, date)
 ##calculate the total for each date
 DFResultDate <- summarise(DFGroupDate,Mean = mean(steps), SUM = as.numeric(sum(steps)))
 
-##calculate the mean and median of daily steps totals across the time perios
+##calculate the mean and median of daily steps totals across the time periods
   stepMedian <-median(DFResultDate$SUM) 
   stepMean <-mean(DFResultDate$SUM) 
  
 ```
 
-Figure 1. Histogram of total steps by date, with the calculated means and medians
 
-```{r, echo = TRUE}
+
+```{r Figure 1. Histogram of total steps, echo = TRUE}
 
   
  hist(DFResultDate$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total")
@@ -78,6 +82,7 @@ Figure 1. Histogram of total steps by date, with the calculated means and median
   cat("The median daily total = ", round(stepMedian))
 
 ```
+Figure 1. Histogram of total steps per day, with the calculated means and medians
 
 ```{r, echo = FALSE}
 
@@ -85,9 +90,6 @@ Figure 1. Histogram of total steps by date, with the calculated means and median
   png(file="figure/figure1.png", width = 480, height = 480, units = "px")
   
  hist(DFResultDate$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total")
-
-  #cat("The mean daily total = ", round(stepMean))
-  #cat("The median daily total = ", round(stepMedian))
 
   dev.off()
 ```
@@ -111,11 +113,10 @@ Group the step observations by intervals
 
 ##count the number of NA values 
   stepNA <- nrow(x)
-
+  #  cat(stepNA, " observations are NA step values")
 
 ```
 
-Figure 2. The line graph of average steps per interval
 
 ```{r, echo= TRUE}
 
@@ -124,19 +125,23 @@ Figure 2. The line graph of average steps per interval
   plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = " ", ylab = "Average Steps per Interval")
 
   points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
-  text(x=stepPoint$interval + 5, y=stepPoint$Mean,"Interval with highest mean number of steps")
+  text(x=stepPoint$interval + 300, y=stepPoint$Mean,"Interval with highest mean number of steps")
   cat("Interval number ", stepPoint$interval, " had the highest mean of ", stepMax)
   
 ```
+Figure 2. The line graph of average steps per interval 
+
+Note:Intervals translate to 5 minute increments using 24:00 clock, eg, 835 = 08:35, 1000 = 10:00, 2350 = 23:50
+
 ```{r, echo = FALSE}
 
-  #open PNG device and file, then draw chart
+  #open PNG device and file, then draw chart and send to figure directory
   png(file="figure/figure2.png")
   plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = " ", ylab = "Average Steps per Interval")
 
   points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
-  text(x=stepPoint$interval + 5, y=stepPoint$Mean,"Interval with highest mean number of steps")
-  #  cat("Interval number ", stepPoint$interval, " had the highest mean of ", stepMax)
+  text(x=stepPoint$interval + 300, y=stepPoint$Mean,"Interval with highest mean number of steps")
+  
   dev.off()
 
 ```
