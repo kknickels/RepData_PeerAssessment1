@@ -49,6 +49,11 @@ The next step was to split the dataframe into observations with and without "NA"
 
   x <- subset(mydata2,is.na(mydata2$steps))
 
+  ##count the number of NA values 
+  stepNA <- nrow(x)
+
+  cat(stepNA, " observations are NA step values")
+
   mydata3 <- subset(mydata2,!is.na(mydata2$steps))
 
 ```
@@ -56,7 +61,7 @@ The next step was to split the dataframe into observations with and without "NA"
 
 Sum the steps by date and calculate the mean and median. 
 
-Note: In the first set of results are shown for only the populated observations.
+Note: In this set of results, only the populated observations are included in plots and calcs.
 
 ```{r , echo = TRUE}
 
@@ -77,16 +82,20 @@ DFResultDate <- summarise(DFGroupDate,Mean = mean(steps), SUM = as.numeric(sum(s
 
   
  hist(DFResultDate$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total")
+```
+
+Figure 1. Histogram of total steps per day, with the calculated means and medians below
+```{r}
 
   cat("The mean daily total = ", round(stepMean))
   cat("The median daily total = ", round(stepMedian))
 
 ```
-Figure 1. Histogram of total steps per day, with the calculated means and medians
+
 
 ```{r, echo = FALSE}
 
-  #open PNG device and file, then draw chart
+  #open PNG device and file, then draw plot and send to figure directory
   png(file="figure/figure1.png", width = 480, height = 480, units = "px")
   
  hist(DFResultDate$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total")
@@ -96,7 +105,7 @@ Figure 1. Histogram of total steps per day, with the calculated means and median
 
 ##What is the average daily activity pattern?
 
-Group the step observations by intervals 
+Group the step observations by intervals and calculate the means
 
 ```{r, echo = TRUE}
 ##use data with only populated step data and group by interval
@@ -111,41 +120,35 @@ Group the step observations by intervals
   stepMax <- max(DFResultInt$Mean)
   stepPoint <- subset(DFResultInt, Mean == stepMax)
 
-##count the number of NA values 
-  stepNA <- nrow(x)
-  #  cat(stepNA, " observations are NA step values")
-
 ```
 
 
-```{r, echo= TRUE}
+Figure 2. The line graph of average steps per interval 
+```{r Figure 2. Line plot of mean steps per interval, echo= TRUE}
 
   par(mar = rep(2, 4))
+  plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = "Intervals", ylab = "Average Steps per Interval")
+    points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
+    text(x=stepPoint$interval + 800, y=stepPoint$Mean,"Interval with highest mean number of steps")
 
-  plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = " ", ylab = "Average Steps per Interval")
-
-  points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
-  text(x=stepPoint$interval + 300, y=stepPoint$Mean,"Interval with highest mean number of steps")
-  cat("Interval number ", stepPoint$interval, " had the highest mean of ", stepMax)
-  
 ```
-Figure 2. The line graph of average steps per interval 
 
-Note:Intervals translate to 5 minute increments using 24:00 clock, eg, 835 = 08:35, 1000 = 10:00, 2350 = 23:50
+
+Note: Intervals translate to 5 minute increments using the 24:00 clock, eg, 835 = 08:35, 1000 = 10:00, 2350 = 23:50
 
 ```{r, echo = FALSE}
 
+  cat("Interval number ", stepPoint$interval, " had the highest mean of ", round(stepMax))
   #open PNG device and file, then draw chart and send to figure directory
   png(file="figure/figure2.png")
   plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = " ", ylab = "Average Steps per Interval")
 
   points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
-  text(x=stepPoint$interval + 300, y=stepPoint$Mean,"Interval with highest mean number of steps")
+  text(x=stepPoint$interval + 800, y=stepPoint$Mean,"Interval with highest mean number of steps")
   
   dev.off()
 
 ```
-
 
 ##Imputing missing values:
 
@@ -170,7 +173,6 @@ As the next step, the interval averages for observations with valid step data ar
   stepMedianComp <-median(DFResultDateComp$SUM)
 ```
 
-Figure 3. 
 ```{r, echo= FALSE} 
 
   #open PNG device and name file, then draw plot
@@ -180,14 +182,13 @@ Figure 3.
   dev.off()
 ```
 
-```{r, echo= FALSE} 
 
-  #open PNG device and name file, then draw plot
-  png(file="figure/figure3.png")
+Figure 3. Histogram of total steps per day, with NA values imputed
+```{r Figure 3. Histogram of total steps per day, with NA values imputed, echo= TRUE} 
 
   hist(DFResultDateComp$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total (completed data)")
 
-  cat("Updated results after filling in the data:")
+  cat("Updated results after imputing missing data:")
   cat("  The mean daily average = ", round(stepMeanComp))
   cat("  The median daily average = ", round(stepMedianComp))
   cat("  ")
@@ -200,9 +201,6 @@ Figure 3.
 ##Are there differences in activity patterns between weekdays and weekends?:
 
 Next the filled in data set is grouped by weekday vs weekend and interval to produce a panel plot comparing the interval averages for weekend vs weekday.  
-
-Figure 4. 
-
 
 ```{r, echo = TRUE}
 
@@ -223,10 +221,12 @@ library(lattice)
   dev.off()
 ```
 
-
-```{r, echo = TRUE}
+Figure 4. Mean Steps Weekend vs Weekday Intervals
+```{r Figure 4. Mean Steps Weekend vs Weekday Intervals, echo = TRUE}
 
 xyplot( Mean ~ interval | wkdy, type = 'b', panel = function(x, y) { llines(x=x,y=y) }, data = DFResultIntW, main = "Steps by Interval Weekend vs Weekday", xlab = "Intervals", ylab = "Mean Steps per Interval", layout=(c(1,2)))
 ```
+
+Note: Intervals translate to 5 minute increments using the 24:00 clock, eg, 835 = 08:35, 1000 = 10:00, 2350 = 23:50
 
 The data set was filled in using interval means; a future enhancement would be to fill in missing data using interval means plus weekday factor.
