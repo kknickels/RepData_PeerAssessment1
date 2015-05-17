@@ -129,10 +129,10 @@ Group the step observations by intervals and calculate the means
 Figure 2. The line graph of average steps per interval 
 
 ```r
-  par(mar = rep(2, 4))
+  #par(mar = rep(2, 4))
   plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = "Intervals", ylab = "Average Steps per Interval")
-    points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
-    text(x=stepPoint$interval + 800, y=stepPoint$Mean,"Interval with highest mean number of steps")
+  points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
+  text(x=stepPoint$interval + 800, y=stepPoint$Mean,"Interval with highest mean number of steps")
 ```
 
 ![plot of chunk Figure 2. Line plot of mean steps per interval](figure/Figure 2. Line plot of mean steps per interval-1.png) 
@@ -142,7 +142,7 @@ Note: Intervals translate to 5 minute increments using the 24:00 clock, eg, 835 
 
 
 ```
-## Interval number  835  had the highest mean of  206
+## Interval number  835  had the highest step mean of  206
 ```
 
 ##Imputing missing values:
