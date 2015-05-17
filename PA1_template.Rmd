@@ -1,37 +1,33 @@
 ---
-title: "Practice"
+title: "PA1_template"
 author: "kknickels"
 date: "Thursday, May 14, 2015"
 output: html_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-This is the first assignment for Reproducible Research.  The data used of for this work is found at the URL below: 
+This is an R Markdown document, the first assignment for Reproducible Research.  The data used used for this work is found at the URL below: 
 
 data source:  https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip
 
 ##Getting started:
 
-As a first step, the packages are pulled in (data.table and dplyr), the directory is defined.
+As a first step, the required packages are pulled into the library (data.table and dplyr), the directory is defined.
 ```{r}
   
   library(data.table)
   library(dplyr)
-  setwd("~/RCode/RepRes")
+  setwd("~/GitHub/CourseraDST/RepData_PeerAssessment1")
   url1 <-"activity.csv"
 ```
 
 
 ##Loading and preprocessing the data:
 
-The data was imported into a dataframe from CSV.  The character date converted to POSIXct for easier manipulation.
-The date is converted to day names and added to a new variable "wkdy".  This variable is then updated to factor weekends "WE" or weekdays/workweek "WW".  I used character substitution, if you see this it means I had not got a more elegant way to work before the deadline!
+The data was imported into a dataframe from CSV file.  The character date converted to POSIXct for easier manipulation.
 
-The next step was to split the table into observations with and without "NA" for step values.
+The date is converted to day names and added to a new variable "wkdy".  This variable is then updated to factor weekends or weekdays/workweek.  I used character substitution, if you see this it means I had not got a more elegant way to work before the deadline!
 
+The next step was to split the dataframe into observations with and without "NA" for step values.
 
 ```{r}
   
@@ -52,58 +48,97 @@ The next step was to split the table into observations with and without "NA" for
 
   mydata3 <- subset(mydata2,!is.na(mydata2$steps))
 
-
 ```
 ##What is mean total number of steps taken per day?:
 
-Group the steps by date and calcualte the means and medians by date and total. 
+Sum the steps by date and calculate the mean and median. 
 Note: In the first set of results are shown for only the populated observations.
 
 ```{r , echo = TRUE}
 
+##use data with only populated step data and group by date
 DFGroupDate <- group_by(mydata3, date)
+##calculate the total for each date
 DFResultDate <- summarise(DFGroupDate,Mean = mean(steps), SUM = as.numeric(sum(steps)))
 
+##calculate the mean and median of daily steps totals across the time perios
   stepMedian <-median(DFResultDate$SUM) 
   stepMean <-mean(DFResultDate$SUM) 
  
 ```
 
-Histogram by interval and by date, with the calculated means and medians
+Figure 1. Histogram of total steps by date, with the calculated means and medians
 
-```{r, echo=FALSE}
+```{r, echo = TRUE}
+
+  
  hist(DFResultDate$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total")
 
-  cat("The mean daily average = ", round(stepMean))
-  cat("The median daily average = ", round(stepMedian))
+  cat("The mean daily total = ", round(stepMean))
+  cat("The median daily total = ", round(stepMedian))
+
+```
+
+```{r, echo = FALSE}
+
+  #open PNG device and file, then draw chart
+  png(file="figure/figure1.png", width = 480, height = 480, units = "px")
+  
+ hist(DFResultDate$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total")
+
+  #cat("The mean daily total = ", round(stepMean))
+  #cat("The median daily total = ", round(stepMedian))
+
+  dev.off()
 ```
 
 ##What is the average daily activity pattern?
 
 Group the step observations by intervals 
 
-```{r}
+```{r, echo = TRUE}
+##use data with only populated step data and group by interval
 
   DFGroupInt<- group_by(mydata3, interval)
+
+##calculate the average for each interval
+
   DFResultInt <- summarise(DFGroupInt,Mean = mean(steps), SUM = as.numeric(sum(steps)), MAX = as.numeric(max(steps)))
 
+##identify the interval with the highest mean 
   stepMax <- max(DFResultInt$Mean)
+  stepPoint <- subset(DFResultInt, Mean == stepMax)
+
+##count the number of NA values 
   stepNA <- nrow(x)
 
-  stepPoint <- subset(DFResultInt, Mean == stepMax)
 
 ```
 
-The line graph of average steps per interval
+Figure 2. The line graph of average steps per interval
 
-```{r, echo= FALSE}
+```{r, echo= TRUE}
 
   par(mar = rep(2, 4))
 
   plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = " ", ylab = "Average Steps per Interval")
 
   points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
-  text(x=stepPoint$interval + 5, y=stepPoint$Mean,"Highest number of steps for the day")
+  text(x=stepPoint$interval + 5, y=stepPoint$Mean,"Interval with highest mean number of steps")
+  cat("Interval number ", stepPoint$interval, " had the highest mean of ", stepMax)
+  
+```
+```{r, echo = FALSE}
+
+  #open PNG device and file, then draw chart
+  png(file="figure/figure2.png")
+  plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = " ", ylab = "Average Steps per Interval")
+
+  points(x=stepPoint$interval, y=stepPoint$Mean, col = "red", type ="p")
+  text(x=stepPoint$interval + 5, y=stepPoint$Mean,"Interval with highest mean number of steps")
+  #  cat("Interval number ", stepPoint$interval, " had the highest mean of ", stepMax)
+  dev.off()
+
 ```
 
 
@@ -111,8 +146,7 @@ The line graph of average steps per interval
 
 As the next step, the interval averages for observations with valid step data are used to populate the observations without data. The data set is re-combined and then the analysis is repeated. 
 
-```{r}
- 
+```{r, echo = TRUE}
 
   mydataNA <- subset(mydata2,is.na(mydata2$steps))
   mydataNA <- select(mydataNA, -steps)
@@ -131,7 +165,21 @@ As the next step, the interval averages for observations with valid step data ar
   stepMedianComp <-median(DFResultDateComp$SUM)
 ```
 
+Figure 3. 
 ```{r, echo= FALSE} 
+
+  #open PNG device and name file, then draw plot
+  png(file="figure/figure3.png")
+
+  hist(DFResultDateComp$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total (completed data)")
+  dev.off()
+```
+
+```{r, echo= FALSE} 
+
+  #open PNG device and name file, then draw plot
+  png(file="figure/figure3.png")
+
   hist(DFResultDateComp$SUM, xlab = "Number of Steps per Day", ylab = "Frequency", col = "red", main = "Histogram of Daily Step Total (completed data)")
 
   cat("Updated results after filling in the data:")
@@ -147,23 +195,33 @@ As the next step, the interval averages for observations with valid step data ar
 ##Are there differences in activity patterns between weekdays and weekends?:
 
 Next the filled in data set is grouped by weekday vs weekend and interval to produce a panel plot comparing the interval averages for weekend vs weekday.  
-The data set was filled in using interval means; a future enhancement would be to fill in missing data using interval means plus weekday factor.
 
-```{r}
+Figure 4. 
+
+
+```{r, echo = TRUE}
 
   DFGroupIntW<- group_by(DFStepsComp, interval, wkdy)
 
   DFResultIntW <- summarise(DFGroupIntW,Mean = mean(steps), SUM = as.numeric(sum(steps)), MAX = as.numeric(max(steps)))
 
-```
-```{r, echo = FALSE}
-
-#par(mfrow=c(1,2))
-#plot(x=DFResultInt$interval, y=DFResultInt$Mean, type = "l", xlab = " ", #ylab = "Average Steps per Interval")
-
 library(lattice)
 
-xyplot(Mean~ interval| wkdy, type = 'b', panel = function(x, y) { llines(x=x,y=y) }, data = DFResultIntW, main = "Steps by Interval Weekend vs Weekday", xlab = "Intervals", ylab = "Mean Steps", layout=(c(1,2)))
+```
+
+```{r, echo= FALSE} 
+
+  #open PNG device and name file, then draw plot
+  png(file="figure/figure4.png")
+
+  xyplot( Mean ~ interval | wkdy, type = 'b', panel = function(x, y) { llines(x=x,y=y) }, data = DFResultIntW, main = "Steps by Interval Weekend vs Weekday", xlab = "Intervals", ylab = "Mean Steps per Interval", layout=(c(1,2)))
+  dev.off()
 ```
 
 
+```{r, echo = TRUE}
+
+xyplot( Mean ~ interval | wkdy, type = 'b', panel = function(x, y) { llines(x=x,y=y) }, data = DFResultIntW, main = "Steps by Interval Weekend vs Weekday", xlab = "Intervals", ylab = "Mean Steps per Interval", layout=(c(1,2)))
+```
+
+The data set was filled in using interval means; a future enhancement would be to fill in missing data using interval means plus weekday factor.
