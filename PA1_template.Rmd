@@ -1,7 +1,7 @@
 ---
 title: "PA1_template"
 author: "kknickels"
-date: "Thursday, May 14, 2015"
+date: "Thursday, May 14, 2015 - resubmitted June 14, 2015"
 output:
   html_document:
     fig_caption: yes
@@ -18,6 +18,7 @@ As a first step, the required packages are pulled into the library (data.table a
   
   library(data.table)
   library(dplyr)
+
   setwd("~/GitHub/CourseraDST/RepData_PeerAssessment1")
   url1 <-"activity.csv"
 ```
