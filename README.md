@@ -1,3 +1,6 @@
+##Note:  this work was previously submitted for earlier course - 
+I did not have time to complete final peer assessment
+
 ## Introduction
 
 It is now possible to collect a large amount of data about personal
