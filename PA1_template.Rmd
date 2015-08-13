@@ -1,7 +1,7 @@
 ---
 title: "PA1_template"
 author: "kknickels"
-date: "Thursday, July 16, 2015" 
+date: "Thursday, August 13, 2015" 
 output:
   html_document:
     fig_caption: yes

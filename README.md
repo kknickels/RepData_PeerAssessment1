@@ -1,5 +1,5 @@
-##Note:  this work was previously submitted for earlier course - 
-I did not have time to complete final peer assessment
+##Note:  this work was previously submitted for course(s) earlier in the year - 
+Each I did not have time to work on the final peer assessment project.
 
 ## Introduction
 
